@@ -126,7 +126,8 @@ const actionToCode = (actionType, actionInfo) => {
             case 'skip':
                 if (actionType !== 'then') throw new Error(`skip is allowed only in if.`)
                 if (/^\d+$/.test(actions[++i])) {
-                    code += `index+=${parseInt(actions[i]) - 1};continue;`
+                    const skip = parseInt(actions[i]) - 1
+                    code += skip ? `index+=${skip};continue;` : 'continue;'
                 } else if (actions[++i] === 'token') {
                     code += `token={text:'',tags:[]};continue;`
                 }
