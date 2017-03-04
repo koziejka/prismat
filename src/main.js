@@ -150,17 +150,12 @@ const actionToCode = (actionType, actionInfo) => {
 /** This function is used to translate if info to js code.
  * @param {{test: String, action: String}} ifInfo
  * @returns {String}
- * @version 1.0.2
+ * @version 1.1.0
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
-const ifToCode = ifInfo => {
+const ifToCode = ifInfo =>
+    `if(${createTestCode(ifInfo.test)}){${actionToCode('then', ifInfo.action)}}`
 
-    const action = ifInfo.action.replace(/^#(\w+)/, 'tokenTags.push("$1");')
-    let actionCode = action
-    let testCode = createTestCode(ifInfo.test)
-
-    return `if(${testCode}){${actionCode}}`
-}
 
 module.exports = {
     getLanguageInfo,
