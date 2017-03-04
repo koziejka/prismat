@@ -44,11 +44,26 @@ const getLanguageInfo = data => {
 /** This function is used to translate if info to js code.
  * @param {{test: String, action: String}} ifInfo
  * @returns {String}
- * @version 1.0.1
+ * @version 1.0.2
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const ifToCode = ifInfo => {
-    const test = ifInfo.test
+
+    const action = ifInfo.action.replace(/^#(\w+)/, 'tokenTags.push("$1");')
+    let actionCode = action
+    let testCode = createTestCode(ifInfo.test)
+
+    return `if(${testCode}){${actionCode}}`
+}
+
+/** This function is used to translate tests writen in prismat to javascript code.
+ * @param {String} testInfo
+ * @returns {String}
+ * @version 1.0.2
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
+ */
+const createTestCode = testInfo => {
+    const test = testInfo
         .split(/\s*(#?\w+|\/[^\/\\]*(?:\\.[^\/\\]*)*\/|'[^\\']*(?:\\.[^\/']*)*'|"[^\\"]*(?:\\.[^\/"]*)*"|`[^\\`]*(?:\\.[^\/`]*)*`|\[\(.*?\)\])\s*/)
         .filter(Boolean)
         .map(text => ({
@@ -60,9 +75,8 @@ const ifToCode = ifInfo => {
                             : /\w+/.test(text) ? 'Varible'
                                 : 'Operator'
         }))
-    const action = ifInfo.action.replace(/^#(\w+)/, 'tokenTags.push("$1");')
 
-    let testCode = '', actionCode = action, lookBack = 0, acces = 'token', lookAhead = false
+    let testCode = '', lookBack = 0, acces = 'token', lookAhead = false
 
     for (let i = 0; i < test.length; i++) {
 
@@ -101,10 +115,11 @@ const ifToCode = ifInfo => {
 
     }
 
-    return testCode ? `if(${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}){${actionCode}}` : ''
+    return `${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}`
 }
 
 module.exports = {
     getLanguageInfo,
-    ifToCode
+    ifToCode,
+    createTestCode
 }
