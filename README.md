@@ -104,7 +104,7 @@ if test then action
 | name         | content                         |
 | ------------ | ------------------------------- |
 | `data`       | data pssed to codeGenerator     |
-| `index`      | index of curently checkked char |
+| `index`      | index of curently checked char  |
 | `curentChar` | curenlty checked character      |
 | `nextChar`   | character after curentChar      |
 | `token`      | curent token                    |
