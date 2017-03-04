@@ -48,7 +48,7 @@ This instruction tells tokenizer when to stop joining letters into token and run
 
 This instruction can be specified only once.
 
-If not specfied /\W/ will be used by default.
+If not specfied `/\W/` will be used by default.
 #### syntax
 ```
 break on /regex/
@@ -89,6 +89,26 @@ if test then action
 | [test] `&&` [test]  | check if first `and` second test finished successfully |
 | [test] `||` [test]  | check if first `or` second test finished successfully |
 | [action] `,` [action] | used to separate execute multiple actions  |
+
+## actions
+
+| action       | description                     |
+| ------------ | ------------------------------- |
+| `skip token` | skips curently matched token    |
+| `skip 1`     | skips n characters without adding them    |
+| `continue`   | continues matching curent token |
+| `throw`      | throws errors                   |
+
+## varibles
+
+| name         | content                         |
+| ------------ | ------------------------------- |
+| `data`       | data pssed to codeGenerator     |
+| `index`      | index of curently checkked char |
+| `curentChar` | curenlty checked character      |
+| `nextChar`   | character after curentChar      |
+| `token`      | curent token                    |
+| `tokens`     | array of matched tokens         |
 
 ## Line comments
 
