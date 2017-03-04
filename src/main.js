@@ -156,10 +156,13 @@ const actionToCode = (actionType, actionInfo) => {
 const ifToCode = ifInfo =>
     `if(${testToCode(ifInfo.test)}){${actionToCode('then', ifInfo.action)}}`
 
+const letToCode = letInfo =>
+    `if(${testToCode(letInfo.test)}){${actionToCode(letInfo.type, letInfo.action)}}`
 
 module.exports = {
     getLanguageInfo,
     ifToCode,
+    letToCode,
     testToCode,
     actionToCode
 }

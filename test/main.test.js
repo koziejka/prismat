@@ -1,6 +1,12 @@
 const { describe, it } = require('mocha')
 const { assert, expect } = chai = require('chai')
-const { getLanguageInfo, ifToCode, testToCode, actionToCode } = require('../src/main')
+const {
+    getLanguageInfo,
+    ifToCode,
+    letToCode,
+    testToCode,
+    actionToCode
+} = require('../src/main')
 
 describe('#main.js', () => {
 
@@ -281,6 +287,10 @@ describe('#main.js', () => {
     })
 
     describe('#if then', () => {
+
+    })
+
+    describe('#let be', () => {
 
     })
 })
