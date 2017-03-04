@@ -1,0 +1,23 @@
+{
+  "name": "prismat",
+  "version": "1.0.0",
+  "description": "Language to create languages.",
+  "main": "main.js",
+  "scripts": {
+    "test": "mocha ./test/main.test.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koziejka/prismat.git"
+  },
+  "author": "Maciej Kozieja <koziejka.com@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/koziejka/prismat/issues"
+  },
+  "homepage": "https://github.com/koziejka/prismat#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
