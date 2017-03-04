@@ -1,6 +1,8 @@
 /** This function is used to extract information from prismat lang.
  * @param {String} data
- * @returns {{if: [{test: String, action: String}], let:[{test: String, type: String, action: String}], break: RegExp}
+ * @returns {getLanguageInfo~langInfo}
+ * @version 1.0.1
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const getLanguageInfo = data => {
     if (data === null || data === undefined)
@@ -10,6 +12,7 @@ const getLanguageInfo = data => {
     const langInfo = {
         if: [],
         let: [],
+        def: [],
         break: /\W/
     }
 
@@ -26,8 +29,13 @@ const getLanguageInfo = data => {
         } else if (/^\s*let/i.test(line)) {
             const [, test, type, action] = line.match(/^let\s+(.*?)\s+(be\s+group|be|throw|expand\s+group)\s+(.*)/)
             langInfo.let.push({ test, type, action })
-        }
-        else throw new Error(`can't understand ${line}`)
+        } else if (/^break\s+on/.test(line)) {
+            const value = line.match(/break\s+on\s+(.*)/)[1].trim()
+            langInfo.break = new RegExp(value.trim().substr(1, value.length - 2))
+        } else if (/^define/.test(line)) {
+            const [, name, value] = line.match(/define\s+([a-zA-Z_]\w*)\s*=?\s*(.*)/)
+            langInfo.def.push({ name, value })
+        } else throw new Error(`can't understand ${line}`)
     }
 
     return langInfo
@@ -36,6 +44,8 @@ const getLanguageInfo = data => {
 /** This function is used to translate if info to js code.
  * @param {{test: String, action: String}} ifInfo
  * @returns {String}
+ * @version 1.0.1
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const ifToCode = ifInfo => {
     const test = ifInfo.test
@@ -61,7 +71,7 @@ const ifToCode = ifInfo => {
             lookAhead = true
         } else if ((test[i + 1] || { text: '->' }).text === '->') {
             acces = 'token'
-        } else if ((test[i + 1] || { }).text === '<-') {
+        } else if ((test[i + 1] || {}).text === '<-') {
             acces = '(tokens[tokens.length - lookBack--] || {tags: []})'
             lookBack++
         }

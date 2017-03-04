@@ -48,6 +48,7 @@ describe('#main.js', () => {
                 assert.isArray(langInfo.if)
                 assert.isArray(langInfo.let)
                 assert.property(langInfo, 'break')
+                assert.isArray(langInfo.def)
             })
 
         })
@@ -64,7 +65,22 @@ describe('#main.js', () => {
                 expect(() => getLanguageInfo(`~ this is comment`)).to.not.throw()
             })
 
-            describe('#if [test] then [action]', () => {
+            describe('#break on', () => {
+                it('understanding syntax', () => {
+                    const data = getLanguageInfo('break on /regex/')
+                    expect(data.break.test('regex')).to.equal(true)
+                })
+            })
+
+            describe('#define', () => {
+                it('understanding syntax', () => {
+                    const data = getLanguageInfo('define x = 1')
+                    expect(data.def[0].name).to.equal('x')
+                    expect(data.def[0].value).to.equal('1')
+                })
+            })
+
+            describe('#if then', () => {
                 it('understanding syntax', () => {
                     const data = getLanguageInfo('if /regex/ && [(js expresion)] then continue')
 
@@ -73,7 +89,7 @@ describe('#main.js', () => {
                 })
             })
 
-            describe('#let [test] be [tag]', () => {
+            describe('#let be', () => {
                 it('understanding syntax', () => {
                     const data = getLanguageInfo(`let /regex/ <- 'test' be #this`)
 
