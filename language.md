@@ -9,7 +9,7 @@ Goal of tokenizer is to split file into tokens and groups of tokens and also to 
 You can controle tokenizer using `break`, `if` and `let` instructions.
 
 ### token
-Token is the smallest groped part of file.
+Token is the smallest grouped part of file.
 
 Tokens have two properties:
 - `text` witch is content of `token`.
@@ -22,12 +22,12 @@ Tokens have two properties:
     tags: Array<String>
 }
 ```
-Tokens can be groped into `tokens grop` using `let group`.
+Tokens can be grouped into `tokens group` using `let group`.
 
 ### tokens group
 Token group is array of `token` and `tokens group`.
 
-Tokens have two properties:
+Token group have two properties:
 - `tokens` witch is content of `tokens group`.
 - `tags` witch is by default empty array, tags can be added by `let` instruction.
 
