@@ -1,6 +1,6 @@
 const { describe, it } = require('mocha')
 const { assert, expect } = chai = require('chai')
-const { getLanguageInfo, ifToCode, createTestCode } = require('../src/main')
+const { getLanguageInfo, ifToCode, createTestCode, actionToCode } = require('../src/main')
 
 describe('#main.js', () => {
 
@@ -224,10 +224,60 @@ describe('#main.js', () => {
         })
     })
 
-    describe('#ifToCode', () => {
-
-        describe('#action generation', () => {
-            it('continue')
+    describe('#action translation', () => {
+        it('continue', () => {
+            let func = Function(`
+                let data = 'this|is|a|test'
+                let token = { text: '', tags: [] }
+                for (let i = 0; i < data.length; i++){
+                    const curentChar = data[i]
+                    if (data[i] == '|') {
+                        ${actionToCode('then', 'continue')}
+                        token = {}
+                    } else token.text += curentChar
+                }
+                return token.text
+            `)
+            expect(func()).to.equal('this|is|a|test')
+        })
+        it('skip n', () => {
+            let func = Function(`
+                let data = 'this|is|a|test'
+                let token = { text: '', tags: [] }
+                for (let index = 0; index < data.length; index++){
+                    const curentChar = data[index]
+                    if (data[index] == '|') {
+                        ${actionToCode('then', 'skip 1')}
+                        token = {}
+                    } else token.text += curentChar
+                }
+                return token.text
+            `)
+            expect(func()).to.equal('thisisatest')
+        })
+        it('skip token', () => {
+            let func = Function(`
+                let data = 'this|'
+                let token = { text: '', tags: [] }
+                for (let index = 0; index < data.length; index++){
+                    const curentChar = data[index]
+                    if (data[index] == '|') {
+                        if (token.text === 'this') {
+                            ${actionToCode('then', 'skip token')}
+                        }
+                        token = {text:'',tags:[]}
+                    } else token.text += curentChar
+                }
+                return token.text
+            `)
+            expect(func()).to.equal('')
+        })
+        it('js evaluation', () => {
+            expect(Function(actionToCode('then', `[(return 'ok')]`))()).to.equal('ok')
+        })
+        it('throw', () => {
+            expect(Function(actionToCode('then', `throw 'this is an Error'`))).to.throw()
         })
     })
+
 })

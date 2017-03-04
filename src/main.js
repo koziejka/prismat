@@ -118,8 +118,53 @@ const createTestCode = testInfo => {
     return `${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}`
 }
 
+/**
+ * @param {String} actionType
+ * @param {String} actionInfo
+ * @returns {String}
+ * @version 1.0.0
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
+ */
+const actionToCode = (actionType, actionInfo) => {
+    const actions = actionInfo
+        .split(/\s*(#?\w+|'[^\\']*(?:\\.[^\/']*)*'|"[^\\"]*(?:\\.[^\/"]*)*"|`[^\\`]*(?:\\.[^\/`]*)*`|\[\(.*?\)\])\s*/)
+        .filter(x => x !== ',' && x !== '')
+
+    let code = ''
+
+    for (let i = 0; i < actions.length; i++) {
+        switch (actions[i]) {
+            case 'continue':
+                if (actionType !== 'then') throw new Error(`continue is allowed only in if.`)
+                code += 'token.text+=curentChar;continue;'
+                break
+            case 'skip':
+                if (actionType !== 'then') throw new Error(`skip is allowed only in if.`)
+                if (/^\d+$/.test(actions[++i])) {
+                    code += `index+=${parseInt(actions[i]) - 1};continue;`
+                } else if (actions[++i] === 'token') {
+                    code += `token={text:'',tags:[]};continue;`
+                }
+                break
+            case 'throw':
+                code += `throw ${actions[++i]}`
+                break
+            case '':
+                break
+            default:
+                if (/^\[\(.*?\)\]$/.test(actions[i])) {
+                    code += actions[i].substr(2, actions[i].length - 4) + ';'
+                }
+                break
+        }
+    }
+
+    return code
+}
+
 module.exports = {
     getLanguageInfo,
     ifToCode,
-    createTestCode
+    createTestCode,
+    actionToCode
 }
