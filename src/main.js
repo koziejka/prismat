@@ -92,5 +92,6 @@ const ifToCode = ifInfo => {
 }
 
 module.exports = {
-    getLanguageInfo
+    getLanguageInfo,
+    ifToCode
 }
