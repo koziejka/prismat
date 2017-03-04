@@ -33,6 +33,64 @@ const getLanguageInfo = data => {
     return langInfo
 }
 
+/** This function is used to translate if info to js code.
+ * @param {{test: String, action: String}} ifInfo
+ * @returns {String}
+ */
+const ifToCode = ifInfo => {
+    const test = ifInfo.test
+        .split(/\s*(#?\w+|\/[^\/\\]*(?:\\.[^\/\\]*)*\/|'[^\\']*(?:\\.[^\/']*)*'|"[^\\"]*(?:\\.[^\/"]*)*"|`[^\\`]*(?:\\.[^\/`]*)*`|\[\(.*?\)\])\s*/)
+        .filter(Boolean)
+        .map(text => ({
+            text,
+            type: /^\/.*?\/$/.test(text) ? 'RegExp'
+                : /^([`'"]).*?\1$/.test(text) ? 'String'
+                    : /^\[\(.*?\)\]$/.test(text) ? 'JsExpresion'
+                        : /#.*/.test(text) ? 'Tag'
+                            : /\w+/.test(text) ? 'Varible'
+                                : 'Operator'
+        }))
+    const action = ifInfo.action.replace(/^#(\w+)/, 'tokenTags.push("$1");')
+
+    let testCode = '', actionCode = action, lookBack = 0, acces = 'token', lookAhead = false
+
+    for (let i = 0; i < test.length; i++) {
+
+        if ((test[i - 1] || {}).text === '->') {
+            acces = `(data[i + ++skip] || '')`
+            lookAhead = true
+        } else if ((test[i + 1] || { text: '->' }).text === '->') {
+            acces = 'token'
+        } else if ((test[i + 1] || {}).text === '<-') {
+            acces = '(tokens[tokens.length - lookBack--] || {})'
+            lookBack++
+        }
+
+        switch (test[i].type) {
+            case 'RegExp':
+                testCode += `(${test[i].text}).test(${acces}${lookAhead ? '' : '.text'})`
+                break
+            case 'String':
+                testCode += `(${test[i].text}===${acces}${lookAhead ? '' : '.text'})`
+                break
+            case 'JsExpresion':
+                testCode += test[i].text.substr(1, test[i].text.length - 2)
+                break
+            case 'Tag':
+            case 'Varible':
+            case 'Operator':
+                if (test[i].text == '||') {
+                    testCode += '||'
+                } else {
+                    testCode += '&&'
+                }
+        }
+
+    }
+
+    return testCode ? `if(${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}){${actionCode}}` : ''
+}
+
 module.exports = {
     getLanguageInfo
 }
