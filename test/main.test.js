@@ -149,6 +149,22 @@ describe('#main.js', () => {
 
             })
 
+            it('look behind with token tag check', () => {
+                const _if = getLanguageInfo(`if #test <- 'token' then continue`).if[0]
+                const code = ifToCode(_if).replace(/{[^)]*?}$/, '') + 'return true;return false'
+
+                const test = Function('tokens', 'token', code)
+
+                const result1 = test([{ tags: ['#test'] }], { text: 'token' })
+                const result2 = test([{ tags: ['#te'] }], { text: 'token' })
+                const result3 = test([], {})
+
+                expect(result1).to.equal(true)
+                expect(result2).to.equal(false)
+                expect(result3).to.equal(false)
+
+            })
+
             it('look ahead operator', () => {
                 const _if = getLanguageInfo(`if 'token' -> 'i' then continue`).if[0]
                 const code = 'i=0;' + ifToCode(_if).replace(/{[^)]*?}$/, '') + 'return true;return false'

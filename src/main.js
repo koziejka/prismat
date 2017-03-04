@@ -61,8 +61,8 @@ const ifToCode = ifInfo => {
             lookAhead = true
         } else if ((test[i + 1] || { text: '->' }).text === '->') {
             acces = 'token'
-        } else if ((test[i + 1] || {}).text === '<-') {
-            acces = '(tokens[tokens.length - lookBack--] || {})'
+        } else if ((test[i + 1] || { }).text === '<-') {
+            acces = '(tokens[tokens.length - lookBack--] || {tags: []})'
             lookBack++
         }
 
@@ -77,7 +77,10 @@ const ifToCode = ifInfo => {
                 testCode += test[i].text.substr(1, test[i].text.length - 2)
                 break
             case 'Tag':
+                testCode += `${acces}.tags.indexOf('${test[i].text}')!==-1`
+                break
             case 'Varible':
+                break
             case 'Operator':
                 if (test[i].text == '||') {
                     testCode += '||'
