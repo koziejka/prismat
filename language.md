@@ -14,6 +14,7 @@ Token is the smallest groped part of file.
 Tokens have two properties:
 - `text` witch is content of `token`.
 - `tags` witch is by default empty `array`, tags can be added by `let` instruction.
+
 #### data structure
 ```typescript
 {
@@ -66,7 +67,7 @@ Regular expresion specified after `break on` will be testing **evry character of
 if test then action
 ```
 
-### let
+### let be|be group|expand group|throw
 
 
 ## tests
@@ -98,5 +99,3 @@ to start line coment just put `~` at begining of line
 ~ this if matches allows matching content of string
 if [(matchingString)] then continue
 ```
-
-<!-- let be|be group|expand group|throw| --!>
