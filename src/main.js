@@ -47,7 +47,7 @@ const getLanguageInfo = data => {
  * @version 1.0.2
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
-const createTestCode = testInfo => {
+const testToCode = testInfo => {
     const test = testInfo
         .split(/\s*(#?\w+|\/[^\/\\]*(?:\\.[^\/\\]*)*\/|'[^\\']*(?:\\.[^\/']*)*'|"[^\\"]*(?:\\.[^\/"]*)*"|`[^\\`]*(?:\\.[^\/`]*)*`|\[\(.*?\)\])\s*/)
         .filter(Boolean)
@@ -154,12 +154,12 @@ const actionToCode = (actionType, actionInfo) => {
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const ifToCode = ifInfo =>
-    `if(${createTestCode(ifInfo.test)}){${actionToCode('then', ifInfo.action)}}`
+    `if(${testToCode(ifInfo.test)}){${actionToCode('then', ifInfo.action)}}`
 
 
 module.exports = {
     getLanguageInfo,
     ifToCode,
-    createTestCode,
+    testToCode,
     actionToCode
 }
