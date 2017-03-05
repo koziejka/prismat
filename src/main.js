@@ -66,7 +66,7 @@ const testToCode = testInfo => {
     for (let i = 0; i < test.length; i++) {
 
         if ((test[i - 1] || {}).text === '->') {
-            acces = `(data[i + ++skip] || '')`
+            acces = `(data[index + ++skip] || '')`
             lookAhead = true
         } else if ((test[i + 1] || { text: '->' }).text === '->') {
             acces = 'token'

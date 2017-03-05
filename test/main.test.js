@@ -188,7 +188,7 @@ describe('#main.js', () => {
 
         it('look ahead operator', () => {
             const _if = getLanguageInfo(`if 'token' -> 'i' then continue`).if[0]
-            const code = 'i=0;if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'index=0;if(' + testToCode(_if.test) + ')return true;return false'
             const test = Function('data', 'token', code)
 
             const result1 = test('this is data', { text: 'token' })
