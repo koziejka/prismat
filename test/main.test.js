@@ -114,7 +114,7 @@ describe('#main.js', () => {
         it('string comparison', () => {
             const _if = getLanguageInfo(`if 'test' then continue`).if[0]
 
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
             const test = Function('token', code)
 
             const result1 = test({ text: 'test' })
@@ -126,7 +126,7 @@ describe('#main.js', () => {
 
         it('regex test', () => {
             const _if = getLanguageInfo(`if /{.*?}$/ then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
 
             const test = Function('token', code)
 
@@ -142,7 +142,7 @@ describe('#main.js', () => {
 
         it('js evaluation', () => {
             const _if = getLanguageInfo(`if [(test)] then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
 
             const test = Function('test', code)
 
@@ -154,9 +154,9 @@ describe('#main.js', () => {
 
         })
 
-        it('look behind operator', () => {
+        it('<- operator', () => {
             const _if = getLanguageInfo(`if 'test' <- 'token' then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
 
             const test = Function('tokens', 'token', code)
 
@@ -170,9 +170,9 @@ describe('#main.js', () => {
 
         })
 
-        it('look behind with token tag check', () => {
+        it('<- with token tag check', () => {
             const _if = getLanguageInfo(`if #test <- 'token' then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
 
             const test = Function('tokens', 'token', code)
 
@@ -186,9 +186,9 @@ describe('#main.js', () => {
 
         })
 
-        it('look ahead operator', () => {
+        it('-> operator', () => {
             const _if = getLanguageInfo(`if 'token' -> 'i' then continue`).if[0]
-            const code = 'index=0;if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'index=0;if(' + testToCode(_if.test).code + ')return true;return false'
             const test = Function('data', 'token', code)
 
             const result1 = test('this is data', { text: 'token' })
@@ -201,9 +201,24 @@ describe('#main.js', () => {
 
         })
 
+        it('<-> operator', () => {
+            const _if = getLanguageInfo(`if 'token' <-> ' ' then continue`).if[0]
+            const code = 'curentChar=data[0];index=0;if(' + testToCode(_if.test).code + ')return true;return false'
+            const test = Function('data', 'token', code)
+
+            const result1 = test('this is data', { text: 'token' })
+            const result2 = test(' is data', { text: 'token' })
+            const result3 = test(' ', { text: 'x' })
+
+            expect(result1).to.equal(false)
+            expect(result2).to.equal(true)
+            expect(result3).to.equal(false)
+
+        })
+
         it('&& operator', () => {
             const _if = getLanguageInfo(`if [(x)] && 'token' then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
             const test = Function('x', 'token', code)
 
             const result1 = test(true, { text: 'token' })
@@ -216,7 +231,7 @@ describe('#main.js', () => {
 
         it('|| operator', () => {
             const _if = getLanguageInfo(`if [(x)] || [(y)] then continue`).if[0]
-            const code = 'if(' + testToCode(_if.test) + ')return true;return false'
+            const code = 'if(' + testToCode(_if.test).code + ')return true;return false'
             const test = Function('x', 'y', code)
 
             const result1 = test(true, true)

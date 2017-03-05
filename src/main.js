@@ -43,8 +43,8 @@ const getLanguageInfo = data => {
 
 /** This function is used to translate prismat tests to javascript code.
  * @param {String} testInfo
- * @returns {String}
- * @version 1.0.2
+ * @returns {{code: String, lookBack: Number}}
+ * @version 1.0.3
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const testToCode = testInfo => {
@@ -65,7 +65,12 @@ const testToCode = testInfo => {
 
     for (let i = 0; i < test.length; i++) {
 
-        if ((test[i - 1] || {}).text === '->') {
+        if ((test[i + 1] || {}).text === '<->') {
+            acces = `token`
+        } else if ((test[i - 1] || {}).text === '<->') {
+            acces = 'curentChar'
+            lookAhead = true
+        } else if ((test[i - 1] || {}).text === '->') {
             acces = `(data[index + ++skip] || '')`
             lookAhead = true
         } else if ((test[i + 1] || { text: '->' }).text === '->') {
@@ -100,17 +105,20 @@ const testToCode = testInfo => {
 
     }
 
-    return `${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}`
+    return {
+        code: `${lookBack ? `lookBack=${lookBack},` : ''}${lookAhead ? `skip=0,` : ''}${testCode}`,
+        lookBack
+    }
 }
 
 /** This function is used to translate prismat actions  to javascript code.
  * @param {'then'|'be'|'be group'|'expand group'|'throw'} actionType
  * @param {String} actionInfo
  * @returns {String}
- * @version 1.0.0
+ * @version 1.0.1
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
-const actionToCode = (actionType, actionInfo) => {
+const actionToCode = (actionType, actionInfo, lookBack = 0) => {
     const actions = actionInfo
         .split(/\s*(#?\w+|'[^\\']*(?:\\.[^\/']*)*'|"[^\\"]*(?:\\.[^\/"]*)*"|`[^\\`]*(?:\\.[^\/`]*)*`|\[\(.*?\)\])\s*/)
         .filter(x => x !== ',' && x !== '')
@@ -128,14 +136,15 @@ const actionToCode = (actionType, actionInfo) => {
                 if (/^\d+$/.test(actions[++i])) {
                     const skip = parseInt(actions[i]) - 1
                     code += skip ? `index+=${skip};continue;` : 'continue;'
-                } else if (actions[++i] === 'token') {
+                } else if (actions[i] === 'token') {
                     code += `token={text:'',tags:[]};continue;`
                 }
                 break
             case 'throw':
                 code += `throw ${actions[++i]}`
                 break
-            case '':
+            case 'join':
+                code += `token.text = ${'tokens.pop().text+'.repeat(lookBack)}token.text`
                 break
             default:
                 if (/^\[\(.*?\)\]$/.test(actions[i])) {
@@ -151,19 +160,69 @@ const actionToCode = (actionType, actionInfo) => {
 /** This function is used to translate if info to js code.
  * @param {{test: String, action: String}} ifInfo
  * @returns {String}
- * @version 1.1.0
+ * @version 1.1.1
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
-const ifToCode = ifInfo =>
-    `if(${testToCode(ifInfo.test)}){${actionToCode('then', ifInfo.action)}}`
+const ifToCode = ifInfo => {
+    const testInfo = testToCode(ifInfo.test)
+    return `if(${testInfo.code}){${actionToCode('then', ifInfo.action, testInfo.lookBack)}}`
+}
 
-const letToCode = letInfo =>
-    `if(${testToCode(letInfo.test)}){${actionToCode(letInfo.type, letInfo.action)}}`
+/** This function is used to translate if info to js code.
+ * @param {{test: String, action: String, type: String}} ifInfo
+ * @returns {String}
+ * @version 1.0.1
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
+ */
+const letToCode = letInfo => {
+    const testInfo = testToCode(letInfo.test)
+    return `if(${testToCode(testInfo.code)}){${actionToCode(letInfo.type, letInfo.action, testInfo.lookBack)}}`
+}
+
+/**
+ * @param {Object} langInfo
+ * @returns {createTokenizer~func}
+ * @version 1.0.0
+ * @author Maciej Kozieja <koziejka.com@gmail.com>
+ */
+const createTokenizer = langInfo => {
+    const ifsCode = langInfo.if.map(ifToCode).join('\nelse ')
+    const letsCode = langInfo.let.map(letToCode).join('\nelse ')
+
+    const func = Function('data', `
+    let skip=0
+    ${langInfo.def.length > 0 ? 'let' : ''} ${langInfo.def.map(x => x.value ? `${x.name}=${x.value}` : x.name).join(',')}
+    const tokens=[]
+    let token={text:'',tags:[]}
+    for (let index=0;index<data.length;index++) {
+        const curentChar=data[index]
+        if(${langInfo.break}.test(curentChar)){
+            ${ifsCode}
+
+            if (token.text){
+                tokens.push(token)
+            }
+            token={text:curentChar,tags:[]}
+
+            ${ifsCode}
+            tokens.push(token)
+            token={text:'',tags:[]}
+        } else token.text+=curentChar
+    }
+    if (token.text){
+        tokens.push(token)
+        token={text:'',tags:[]}
+    }
+    return tokens
+    `)
+    return func
+}
 
 module.exports = {
     getLanguageInfo,
     ifToCode,
     letToCode,
     testToCode,
-    actionToCode
+    actionToCode,
+    createTokenizer
 }
