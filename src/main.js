@@ -182,14 +182,15 @@ const letToCode = letInfo => {
 /**
  * @param {Object} langInfo
  * @returns {createTokenizer~func}
- * @version 1.0.0
+ * @version 1.0.1
  * @author Maciej Kozieja <koziejka.com@gmail.com>
  */
 const createTokenizer = langInfo => {
     const ifsCode = langInfo.if.map(ifToCode).join('\nelse ')
     const letsCode = langInfo.let.map(letToCode).join('\nelse ')
 
-    const func = Function('data', `
+    const func = Function('file', `
+    let data = file + '\\0'
     let skip=0
     ${langInfo.def.length > 0 ? 'let' : ''} ${langInfo.def.map(x => x.value ? `${x.name}=${x.value}` : x.name).join(',')}
     const tokens=[]
@@ -209,10 +210,7 @@ const createTokenizer = langInfo => {
             token={text:'',tags:[]}
         } else token.text+=curentChar
     }
-    if (token.text){
-        tokens.push(token)
-        token={text:'',tags:[]}
-    }
+    tokens.pop()
     return tokens
     `)
     return func

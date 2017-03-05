@@ -1,0 +1,7 @@
+define matchString
+
+~ matching numbers ~
+if /^\d+$/ <-> '.' then continue
+if '.' <- /^\d+$/ then join
+~ skiping white space ~
+if /\s+/ then skip token
