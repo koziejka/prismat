@@ -86,6 +86,7 @@ if test then action
 | ------------------- | ------------------- |
 | [test] `<-`         | test previous `token` |
 | `->` [test]         | test next `character` |
+| [test] `<->` [test] | test curent `token` and break `character` |
 | [test] `&&` [test]  | check if first `and` second test finished successfully |
 | [test] `||` [test]  | check if first `or` second test finished successfully |
 | [action] `,` [action] | used to separate execute multiple actions  |
